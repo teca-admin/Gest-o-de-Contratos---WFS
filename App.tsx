@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { PurchaseRecord, Category } from './types.ts';
 import { INITIAL_BASES, CATEGORIES, APP_CONFIG } from './constants.ts';
-import { Input, Select } from './components/Input.tsx';
+import { Input, Select, DatePicker } from './components/Input.tsx';
 import { Modal } from './components/Modal.tsx';
 
 const App: React.FC = () => {
@@ -165,14 +165,14 @@ const App: React.FC = () => {
             <table className="w-full text-left border-collapse table-fixed min-w-[1200px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
-                  <th className="px-6 py-5 w-[140px]">Vencimento</th>
-                  <th className="px-6 py-5 w-[100px]">BASE</th>
+                  <th className="px-6 py-5 w-[220px]">FORNECEDOR</th>
                   <th className="px-6 py-5 w-[140px]">CATEGORIA</th>
-                  <th className="px-6 py-5 w-[200px]">Fornecedor</th>
-                  <th className="px-6 py-5 w-[130px]">Ref. Documento</th>
+                  <th className="px-6 py-5 w-[100px]">BASE</th>
+                  <th className="px-6 py-5 w-[180px]">REFERÊNCIA DO DOCUMENTO</th>
+                  <th className="px-6 py-5 w-[240px]">DESCRIÇÃO</th>
                   <th className="px-6 py-5 w-[110px]">PEDIDO</th>
-                  <th className="px-6 py-5 w-[220px]">DESCRIÇÃO</th>
                   <th className="px-6 py-5 w-[140px] text-right">VALOR</th>
+                  <th className="px-6 py-5 w-[140px] text-right">VENCIMENTO</th>
                   <th className="px-6 py-5 w-[80px] text-center">Ações</th>
                 </tr>
               </thead>
@@ -192,15 +192,9 @@ const App: React.FC = () => {
                   records.map((record) => (
                     <tr key={record.id} className="hover:bg-slate-50/80 transition-all group align-top">
                       <td className="px-6 py-6">
-                        <div className="text-sm font-bold text-slate-900">
-                          {new Date(record.vencimento).toLocaleDateString(APP_CONFIG.LOCALE)}
+                        <div className="font-bold text-slate-900 text-sm truncate uppercase tracking-tight" title={record.fornecedor}>
+                          {record.fornecedor}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-medium uppercase">Previsão</div>
-                      </td>
-                      <td className="px-6 py-6">
-                        <span className="inline-flex px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-tighter">
-                          {record.base}
-                        </span>
                       </td>
                       <td className="px-6 py-6">
                         <span className={`
@@ -213,9 +207,9 @@ const App: React.FC = () => {
                         </span>
                       </td>
                       <td className="px-6 py-6">
-                        <div className="font-bold text-slate-900 text-sm truncate uppercase tracking-tight" title={record.fornecedor}>
-                          {record.fornecedor}
-                        </div>
+                        <span className="inline-flex px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-tighter">
+                          {record.base}
+                        </span>
                       </td>
                       <td className="px-6 py-6">
                         <div className="text-[10px] font-bold text-slate-500 break-all">
@@ -223,19 +217,25 @@ const App: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-6">
-                         <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 inline-block rounded-sm">
-                           #{record.pedido || '---'}
-                         </div>
-                      </td>
-                      <td className="px-6 py-6">
                         <div className="text-xs text-slate-500 leading-relaxed italic line-clamp-2" title={record.descricao}>
                           {record.descricao || 'Nenhuma descrição técnica informada'}
                         </div>
+                      </td>
+                      <td className="px-6 py-6">
+                         <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 inline-block rounded-sm">
+                           #{record.pedido || '---'}
+                         </div>
                       </td>
                       <td className="px-6 py-6 text-right">
                         <span className="text-sm font-black text-slate-900">
                           {formatCurrency(record.valor)}
                         </span>
+                      </td>
+                      <td className="px-6 py-6 text-right">
+                        <div className="text-sm font-bold text-slate-900">
+                          {new Date(record.vencimento).toLocaleDateString(APP_CONFIG.LOCALE)}
+                        </div>
+                        <div className="text-[10px] text-slate-400 font-medium uppercase">Previsão</div>
                       </td>
                       <td className="px-6 py-6 text-center">
                         <button 
@@ -325,9 +325,8 @@ const App: React.FC = () => {
               onChange={e => setFormData(f => ({ ...f, valor: Number(e.target.value) }))}
               required
             />
-            <Input 
+            <DatePicker 
               label="VENCIMENTO"
-              type="date"
               value={formData.vencimento}
               onChange={e => setFormData(f => ({ ...f, vencimento: e.target.value }))}
               required

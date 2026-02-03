@@ -125,3 +125,49 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
     </div>
   );
 };
+
+export const DatePicker: React.FC<Omit<InputProps, 'type'>> = ({ label, value, onChange, error, required, ...props }) => {
+  const displayDate = value ? (value as string).split('-').reverse().join('/') : '';
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full text-left">
+      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">
+        {label} {required && <span className="text-red-400">*</span>}
+      </label>
+      <div className="relative h-[48px] group">
+        {/* Camada Visual de Interface */}
+        <div className={`
+          absolute inset-0 px-4 py-2 flex items-center justify-between
+          border border-slate-200 bg-slate-50/50 pointer-events-none
+          transition-all duration-300 text-sm font-medium
+          group-hover:border-slate-300 group-focus-within:border-indigo-500 group-focus-within:bg-white
+          ${error ? 'border-red-500' : ''}
+        `}>
+          <span className={value ? 'text-slate-900' : 'text-slate-300'}>
+            {displayDate || 'Escolha uma data...'}
+          </span>
+          <svg className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        </div>
+        
+        {/* Input Nativo Invisível (Trigger do Calendário) */}
+        <input
+          {...props}
+          type="date"
+          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 block"
+          value={value}
+          onChange={onChange}
+          required={required}
+          // Garante que o seletor abra mesmo se o navegador for restritivo
+          onClick={(e) => {
+            if ('showPicker' in e.currentTarget) {
+              try { e.currentTarget.showPicker(); } catch(err) {}
+            }
+          }}
+        />
+      </div>
+      {error && <span className="text-[10px] font-semibold text-red-500 mt-1">{error}</span>}
+    </div>
+  );
+};
