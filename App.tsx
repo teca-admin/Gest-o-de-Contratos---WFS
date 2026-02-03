@@ -141,7 +141,7 @@ const App: React.FC = () => {
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
-              <p className="text-xs text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas.</p>
+              <p className="text-xs text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
             </div>
             <div className="flex gap-3">
               <button 
@@ -162,22 +162,24 @@ const App: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse table-fixed min-w-[1200px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
-                  <th className="px-8 py-5">Vencimento</th>
-                  <th className="px-8 py-5">Unidade / Base</th>
-                  <th className="px-8 py-5">Fornecedor & Detalhamento</th>
-                  <th className="px-8 py-5">Documentação</th>
-                  <th className="px-8 py-5">Classificação</th>
-                  <th className="px-8 py-5 text-right">Montante</th>
-                  <th className="px-8 py-5 text-center">Ações</th>
+                  <th className="px-6 py-5 w-[140px]">Vencimento</th>
+                  <th className="px-6 py-5 w-[100px]">BASE</th>
+                  <th className="px-6 py-5 w-[140px]">CATEGORIA</th>
+                  <th className="px-6 py-5 w-[200px]">Fornecedor</th>
+                  <th className="px-6 py-5 w-[130px]">Ref. Documento</th>
+                  <th className="px-6 py-5 w-[110px]">PEDIDO</th>
+                  <th className="px-6 py-5 w-[220px]">DESCRIÇÃO</th>
+                  <th className="px-6 py-5 w-[140px] text-right">VALOR</th>
+                  <th className="px-6 py-5 w-[80px] text-center">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {records.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-8 py-32 text-center">
+                    <td colSpan={9} className="px-8 py-32 text-center">
                        <div className="flex flex-col items-center gap-3 opacity-30">
                           <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -188,35 +190,21 @@ const App: React.FC = () => {
                   </tr>
                 ) : (
                   records.map((record) => (
-                    <tr key={record.id} className="hover:bg-slate-50/80 transition-all group">
-                      <td className="px-8 py-6">
+                    <tr key={record.id} className="hover:bg-slate-50/80 transition-all group align-top">
+                      <td className="px-6 py-6">
                         <div className="text-sm font-bold text-slate-900">
                           {new Date(record.vencimento).toLocaleDateString(APP_CONFIG.LOCALE)}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-medium">Data limite</div>
+                        <div className="text-[10px] text-slate-400 font-medium uppercase">Previsão</div>
                       </td>
-                      <td className="px-8 py-6">
-                        <span className="inline-flex px-3 py-1 bg-slate-900 text-white text-[10px] font-black">
+                      <td className="px-6 py-6">
+                        <span className="inline-flex px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-tighter">
                           {record.base}
                         </span>
                       </td>
-                      <td className="px-8 py-6 max-w-sm">
-                        <div className="font-bold text-slate-900 text-sm truncate">{record.fornecedor}</div>
-                        <div className="text-xs text-slate-400 truncate font-medium">{record.descricao || 'Sem descrição analítica'}</div>
-                      </td>
-                      <td className="px-8 py-6">
-                        <div className="text-[10px] font-bold space-y-1">
-                          <div className="flex items-center gap-1.5 text-slate-500">
-                            <span className="w-8 opacity-40">DOC</span> {record.documento || '---'}
-                          </div>
-                          <div className="flex items-center gap-1.5 text-slate-400">
-                            <span className="w-8 opacity-40">PED</span> {record.pedido || '---'}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-8 py-6">
+                      <td className="px-6 py-6">
                         <span className={`
-                          text-[9px] font-black px-3 py-1.5 uppercase tracking-widest border
+                          text-[9px] font-black px-2.5 py-1 uppercase tracking-widest border block text-center
                           ${record.categoria === Category.LOCACAO ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : ''}
                           ${record.categoria === Category.MATERIAL ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ''}
                           ${record.categoria === Category.SERVICO ? 'bg-amber-50 text-amber-700 border-amber-100' : ''}
@@ -224,17 +212,37 @@ const App: React.FC = () => {
                           {record.categoria}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-right">
-                        <span className="text-base font-extrabold text-slate-900">
+                      <td className="px-6 py-6">
+                        <div className="font-bold text-slate-900 text-sm truncate uppercase tracking-tight" title={record.fornecedor}>
+                          {record.fornecedor}
+                        </div>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="text-[10px] font-bold text-slate-500 break-all">
+                          {record.documento || <span className="text-slate-200">SEM REF.</span>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-6">
+                         <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 inline-block rounded-sm">
+                           #{record.pedido || '---'}
+                         </div>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="text-xs text-slate-500 leading-relaxed italic line-clamp-2" title={record.descricao}>
+                          {record.descricao || 'Nenhuma descrição técnica informada'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 text-right">
+                        <span className="text-sm font-black text-slate-900">
                           {formatCurrency(record.valor)}
                         </span>
                       </td>
-                      <td className="px-8 py-6 text-center">
+                      <td className="px-6 py-6 text-center">
                         <button 
                           onClick={() => deleteRecord(record.id)}
-                          className="p-2.5 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
                         >
-                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                           </svg>
                         </button>
@@ -248,7 +256,6 @@ const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Modern High-End Modal */}
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
@@ -256,7 +263,7 @@ const App: React.FC = () => {
       >
         <form onSubmit={handleSubmit} className="space-y-8">
           <Input 
-            label="Provedor de Serviço / Fornecedor"
+            label="FORNECEDOR"
             value={formData.fornecedor}
             onChange={e => setFormData(f => ({ ...f, fornecedor: e.target.value }))}
             placeholder="Razão Social ou Nome Fantasia"
@@ -265,14 +272,14 @@ const App: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-6">
             <Select 
-              label="Classificação de Ativo"
+              label="CATEGORIA"
               options={CATEGORIES}
               value={formData.categoria}
               onChange={e => setFormData(f => ({ ...f, categoria: e.target.value as Category }))}
               required
             />
             <Select 
-              label="Unidade de Negócio (Base)"
+              label="BASE"
               options={INITIAL_BASES}
               value={formData.base}
               onChange={e => setFormData(f => ({ ...f, base: e.target.value }))}
@@ -288,7 +295,7 @@ const App: React.FC = () => {
               placeholder="N. Nota Fiscal ou Boleto"
             />
             <Input 
-              label="Protocolo de Pedido"
+              label="PEDIDO"
               type="text"
               maxLength={6}
               pattern="\d{6}"
@@ -302,7 +309,7 @@ const App: React.FC = () => {
           </div>
 
           <Input 
-            label="Contexto do Investimento"
+            label="DESCRIÇÃO"
             value={formData.descricao}
             onChange={e => setFormData(f => ({ ...f, descricao: e.target.value }))}
             placeholder="Breve resumo da finalidade deste gasto..."
@@ -310,15 +317,16 @@ const App: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-6">
             <Input 
-              label="Montante Financeiro (R$)"
+              label="VALOR"
               type="number"
               step="0.01"
-              value={formData.valor}
+              prefix="R$"
+              value={formData.valor || ''}
               onChange={e => setFormData(f => ({ ...f, valor: Number(e.target.value) }))}
               required
             />
             <Input 
-              label="Data Prevista de Vencimento"
+              label="VENCIMENTO"
               type="date"
               value={formData.vencimento}
               onChange={e => setFormData(f => ({ ...f, vencimento: e.target.value }))}
