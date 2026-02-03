@@ -1,12 +1,19 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
 import { PurchaseRecord, Category } from './types.ts';
 import { INITIAL_BASES, CATEGORIES, APP_CONFIG } from './constants.ts';
 import { Input, Select, DatePicker } from './components/Input.tsx';
 import { Modal } from './components/Modal.tsx';
 
+// Inicialização do cliente Supabase
+const supabaseUrl = 'https://vxhylzrertszbneyfzov.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ4aHlsenJlcnRzemJuZXlmem92Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAxMjY4NTUsImV4cCI6MjA4NTcwMjg1NX0.EqHQmzY9zWxMmi-UDRE3dvfIs0XGBJtOIHwSqsZOhxI';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 const App: React.FC = () => {
   const [records, setRecords] = useState<PurchaseRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState<Partial<PurchaseRecord>>({
     fornecedor: '',
@@ -19,36 +26,67 @@ const App: React.FC = () => {
     vencimento: ''
   });
 
+  // Buscar dados do Supabase ao montar o componente
   useEffect(() => {
-    const saved = localStorage.getItem('base_spend_records');
-    if (saved) {
-      try { setRecords(JSON.parse(saved)); } catch (e) { console.error(e); }
-    }
+    fetchRecords();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('base_spend_records', JSON.stringify(records));
-  }, [records]);
+  const fetchRecords = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('purchase_records')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-  const handleSubmit = (e: React.FormEvent) => {
+    if (error) {
+      console.error('Erro ao buscar dados:', error);
+    } else {
+      setRecords(data || []);
+    }
+    setLoading(false);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fornecedor || !formData.categoria || !formData.base || !formData.valor || !formData.vencimento) return;
 
-    const newRecord: PurchaseRecord = {
-      ...(formData as PurchaseRecord),
-      id: crypto.randomUUID(),
+    const recordToInsert = {
+      fornecedor: formData.fornecedor,
+      categoria: formData.categoria,
+      base: formData.base,
+      documento: formData.documento || '',
+      descricao: formData.descricao || '',
+      pedido: formData.pedido || '',
       valor: Number(formData.valor),
-      createdAt: new Date().toISOString()
+      vencimento: formData.vencimento
     };
 
-    setRecords(prev => [newRecord, ...prev]);
-    setFormData({ fornecedor: '', categoria: undefined, base: '', documento: '', descricao: '', pedido: '', valor: 0, vencimento: '' });
-    setIsModalOpen(false);
+    const { data, error } = await supabase
+      .from('purchase_records')
+      .insert([recordToInsert])
+      .select();
+
+    if (error) {
+      alert('Erro ao salvar no banco de dados: ' + error.message);
+    } else if (data) {
+      setRecords(prev => [data[0], ...prev]);
+      setFormData({ fornecedor: '', categoria: undefined, base: '', documento: '', descricao: '', pedido: '', valor: 0, vencimento: '' });
+      setIsModalOpen(false);
+    }
   };
 
-  const deleteRecord = (id: string) => {
+  const deleteRecord = async (id: string) => {
     if (confirm("Deseja realmente remover este registro estratégico?")) {
-      setRecords(prev => prev.filter(r => r.id !== id));
+      const { error } = await supabase
+        .from('purchase_records')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        alert('Erro ao excluir: ' + error.message);
+      } else {
+        setRecords(prev => prev.filter(r => r.id !== id));
+      }
     }
   };
 
@@ -56,25 +94,21 @@ const App: React.FC = () => {
     const map = new Map<string, { total: number; count: number }>();
     records.forEach(r => {
       const current = map.get(r.base) || { total: 0, count: 0 };
-      map.set(r.base, { total: current.total + r.valor, count: current.count + 1 });
+      map.set(r.base, { total: current.total + Number(r.valor), count: current.count + 1 });
     });
     return Array.from(map.entries()).map(([base, stats]) => ({ base, ...stats }));
   }, [records]);
 
-  const totalGeral = records.reduce((acc, curr) => acc + curr.valor, 0);
+  const totalGeral = records.reduce((acc, curr) => acc + Number(curr.valor), 0);
 
   const formatCurrency = (val: number) => 
     val.toLocaleString(APP_CONFIG.LOCALE, { style: 'currency', currency: APP_CONFIG.CURRENCY });
 
   const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Permite apenas números, um único ponto ou vírgula
     const rawValue = e.target.value;
     const sanitized = rawValue.replace(/[^0-9.,]/g, '').replace(',', '.');
-    
-    // Garante que só existe um ponto decimal
     const parts = sanitized.split('.');
     const finalValue = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : sanitized;
-    
     setFormData(f => ({ ...f, valor: finalValue === '' ? 0 : finalValue as any }));
   };
 
@@ -103,7 +137,9 @@ const App: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Volume Operacional</p>
-                <p className="text-xl font-extrabold text-indigo-600">{records.length} <span className="text-[11px] font-medium text-slate-400">lançamentos</span></p>
+                <p className="text-xl font-extrabold text-indigo-600">
+                  {loading ? '...' : records.length} <span className="text-[11px] font-medium text-slate-400">lançamentos</span>
+                </p>
               </div>
             </div>
           </div>
@@ -144,7 +180,7 @@ const App: React.FC = () => {
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
-              <p className="text-[11px] text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
+              <p className="text-[11px] text-slate-400 font-medium mt-1">Sincronizado com Supabase Cloud.</p>
             </div>
             <button 
               onClick={() => setIsModalOpen(true)}
@@ -157,7 +193,16 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto relative min-h-[400px]">
+            {loading && (
+              <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10 flex items-center justify-center">
+                <div className="flex flex-col items-center gap-3">
+                   <div className="w-8 h-8 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Sincronizando dados...</p>
+                </div>
+              </div>
+            )}
+            
             <table className="w-full text-center border-collapse table-fixed min-w-[1200px]">
               <thead>
                 <tr className="bg-slate-50/50 text-slate-400 text-[11px] uppercase font-black tracking-widest align-middle">
@@ -169,12 +214,13 @@ const App: React.FC = () => {
                   <th className="px-6 py-5 w-[12%] text-center">PEDIDO</th>
                   <th className="px-6 py-5 w-[12%] text-center">VALOR</th>
                   <th className="px-6 py-5 w-[12%] text-center">VENCIMENTO</th>
+                  <th className="px-6 py-5 w-[8%] text-center">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {records.length === 0 ? (
+                {records.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan={8} className="px-8 py-32 text-center">
+                    <td colSpan={9} className="px-8 py-32 text-center">
                        <div className="flex flex-col items-center gap-3 opacity-30">
                           <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -223,14 +269,24 @@ const App: React.FC = () => {
                       </td>
                       <td className="px-6 py-6 text-center">
                         <span className="text-[11px] font-black text-slate-900">
-                          {formatCurrency(record.valor)}
+                          {formatCurrency(Number(record.valor))}
                         </span>
                       </td>
                       <td className="px-6 py-6 text-center">
                         <div className="text-[11px] font-bold text-slate-900">
-                          {new Date(record.vencimento).toLocaleDateString(APP_CONFIG.LOCALE)}
+                          {new Date(record.vencimento + 'T00:00:00').toLocaleDateString(APP_CONFIG.LOCALE)}
                         </div>
                         <div className="text-[11px] text-slate-400 font-medium uppercase">Previsão</div>
+                      </td>
+                      <td className="px-6 py-6 text-center">
+                        <button 
+                          onClick={() => deleteRecord(record.id)}
+                          className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
                       </td>
                     </tr>
                   ))
