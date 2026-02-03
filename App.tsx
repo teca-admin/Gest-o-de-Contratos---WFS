@@ -106,15 +106,6 @@ const App: React.FC = () => {
                 <p className="text-xl font-extrabold text-indigo-600">{records.length} <span className="text-[11px] font-medium text-slate-400">lançamentos</span></p>
               </div>
             </div>
-            <button 
-              onClick={() => setIsModalOpen(true)}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Novo Lançamento
-            </button>
           </div>
         </div>
       </header>
@@ -155,6 +146,15 @@ const App: React.FC = () => {
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
               <p className="text-[11px] text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
             </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Novo Lançamento
+            </button>
           </div>
 
           <div className="overflow-x-auto">
