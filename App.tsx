@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { PurchaseRecord, Category } from './types';
-import { INITIAL_BASES, CATEGORIES, APP_CONFIG } from './constants';
-import { Input, Select } from './components/Input';
-import { Modal } from './components/Modal';
+import { PurchaseRecord, Category } from './types.ts';
+import { INITIAL_BASES, CATEGORIES, APP_CONFIG } from './constants.ts';
+import { Input, Select } from './components/Input.tsx';
+import { Modal } from './components/Modal.tsx';
 
 const App: React.FC = () => {
   const [records, setRecords] = useState<PurchaseRecord[]>([]);
