@@ -66,6 +66,18 @@ const App: React.FC = () => {
   const formatCurrency = (val: number) => 
     val.toLocaleString(APP_CONFIG.LOCALE, { style: 'currency', currency: APP_CONFIG.CURRENCY });
 
+  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Permite apenas números, um único ponto ou vírgula
+    const rawValue = e.target.value;
+    const sanitized = rawValue.replace(/[^0-9.,]/g, '').replace(',', '.');
+    
+    // Garante que só existe um ponto decimal
+    const parts = sanitized.split('.');
+    const finalValue = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join('')}` : sanitized;
+    
+    setFormData(f => ({ ...f, valor: finalValue === '' ? 0 : finalValue as any }));
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Executive Header */}
@@ -142,22 +154,6 @@ const App: React.FC = () => {
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
               <p className="text-[11px] text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
-            </div>
-            <div className="flex gap-3">
-              <button 
-                onClick={() => {
-                  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(records));
-                  const a = document.createElement('a');
-                  a.href = dataStr; a.download = "wfs_gestao_audit.json";
-                  a.click();
-                }}
-                className="flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Exportar Audit
-              </button>
             </div>
           </div>
 
@@ -287,7 +283,6 @@ const App: React.FC = () => {
               label="PEDIDO"
               type="text"
               maxLength={6}
-              pattern="\d{6}"
               value={formData.pedido}
               onChange={e => {
                 const val = e.target.value.replace(/\D/g, '');
@@ -307,11 +302,12 @@ const App: React.FC = () => {
           <div className="grid grid-cols-2 gap-6">
             <Input 
               label="VALOR"
-              type="number"
-              step="0.01"
+              type="text"
+              inputMode="decimal"
               prefix="R$"
               value={formData.valor || ''}
-              onChange={e => setFormData(f => ({ ...f, valor: Number(e.target.value) }))}
+              onChange={handleValorChange}
+              placeholder="0,00"
               required
             />
             <DatePicker 

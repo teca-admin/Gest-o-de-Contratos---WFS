@@ -33,7 +33,6 @@ export const Input: React.FC<InputProps> = ({ label, error, prefix, className, .
             ${prefix ? 'pl-11' : ''}
             ${error ? 'border-red-500' : 'hover:border-slate-300'}
             disabled:opacity-50
-            [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none
             ${className}
           `}
         />
@@ -78,11 +77,17 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
     };
     window.addEventListener('scroll', handleEvents, true);
     window.addEventListener('resize', handleEvents);
+    
     const handleClickOutside = (event: MouseEvent) => {
+      // Ignora se o clique for dentro do portal do select
+      const portal = document.querySelector('[data-select-portal]');
+      if (portal?.contains(event.target as Node)) return;
+      
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       window.removeEventListener('scroll', handleEvents, true);
@@ -129,6 +134,7 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
 
       {isOpen && coords.width > 0 && createPortal(
         <div 
+          data-select-portal
           style={{ 
             position: 'fixed', 
             top: coords.top + 4, 
@@ -143,6 +149,7 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
               <button
                 key={opt}
                 type="button"
+                onMouseDown={(e) => e.preventDefault()} // Impede perda de foco antes do click
                 onClick={() => handleSelect(opt)}
                 className={`
                   w-full px-4 py-3 text-[11px] text-left font-semibold transition-colors
@@ -202,13 +209,16 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
     };
     window.addEventListener('scroll', handleEvents, true);
     window.addEventListener('resize', handleEvents);
+    
     const handleClickOutside = (event: MouseEvent) => {
+      const portal = document.querySelector('[data-datepicker-portal]');
+      if (portal?.contains(event.target as Node)) return;
+      
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-        const portalContent = document.querySelector('[data-datepicker-portal]');
-        if (portalContent && portalContent.contains(event.target as Node)) return;
         setIsOpen(false);
       }
     };
+    
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
       window.removeEventListener('scroll', handleEvents, true);
@@ -248,6 +258,11 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
   const daysInMonth = getDaysInMonth(currentYear, currentMonth);
   const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
   
+  // Cálculo de linhas necessárias (evita espaço vazio)
+  const totalSlotsNeeded = firstDay + daysInMonth;
+  const rowsNeeded = Math.ceil(totalSlotsNeeded / 7);
+  const totalGridSlots = rowsNeeded * 7;
+
   const displayValue = value ? (value as string).split('-').reverse().join('/') : '';
   const selectedDate = value ? new Date(value as string + 'T00:00:00') : null;
 
@@ -288,7 +303,6 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
           }}
           className="w-[280px] bg-white border border-slate-200 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.3)] p-4 animate-in fade-in slide-in-from-top-2 duration-200 rounded-sm"
         >
-          {/* Calendar Header */}
           <div className="flex items-center justify-between mb-4">
             <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 text-slate-400 hover:text-indigo-600 transition-all rounded-full">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -305,7 +319,6 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
             </button>
           </div>
 
-          {/* Day Headers */}
           <div className="grid grid-cols-7 mb-2 border-b border-slate-50 pb-2">
             {daysOfWeek.map((d, i) => (
               <div key={`${d}-${i}`} className="text-center text-[9px] font-black text-slate-300 uppercase">
@@ -314,7 +327,6 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
             ))}
           </div>
 
-          {/* Days Grid */}
           <div className="grid grid-cols-7 gap-px bg-slate-100 border border-slate-100 overflow-hidden">
             {Array.from({ length: firstDay }).map((_, i) => (
               <div key={`empty-${i}`} className="bg-white aspect-square" />
@@ -350,7 +362,8 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
               );
             })}
             
-            {Array.from({ length: 42 - (firstDay + daysInMonth) }).map((_, i) => (
+            {/* Slots dinâmicos de final de grade para manter o alinhamento */}
+            {Array.from({ length: totalGridSlots - totalSlotsNeeded }).map((_, i) => (
               <div key={`empty-end-${i}`} className="bg-white aspect-square" />
             ))}
           </div>
