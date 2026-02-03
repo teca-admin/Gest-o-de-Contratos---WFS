@@ -4,12 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestão de Contratos - WFS</title>
+    <title>WFS - Controle de Ativos</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         html {
-            /* Define a base para o rem como 11px, o que já ajuda na escala */
             font-size: 11px;
         }
         body {
@@ -17,7 +16,6 @@
             background-color: #f8fafc;
             color: #0f172a;
             -webkit-font-smoothing: antialiased;
-            /* Aplica a redução de zoom de 10% em relação ao viewport */
             zoom: 0.9;
             font-size: 11px;
         }
@@ -35,10 +33,9 @@
             background: #94a3b8;
         }
         
-        /* Ajuste para garantir que o zoom não quebre o layout fixo em telas menores */
         @media (max-width: 1024px) {
             body {
-                zoom: 1; /* Retorna ao normal em telas pequenas para evitar perda de acessibilidade */
+                zoom: 1;
             }
         }
     </style>
@@ -52,12 +49,10 @@
       }
     }
     </script>
-    <!-- Adicionando o script principal explicitamente -->
     <script type="module" src="./index.tsx"></script>
 </head>
 <body>
     <div id="root">
-        <!-- Indicador de carregamento caso o JS demore a baixar -->
         <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: #cbd5e1; font-weight: 500;">
             Inicializando sistema WFS...
         </div>

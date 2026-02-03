@@ -169,7 +169,8 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
   );
 };
 
-export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'>> = ({ 
+// Fix: Redefined prop types for DatePicker to include 'value' and 'onChange' which were previously omitted by mistake.
+export const DatePicker: React.FC<Omit<InputProps, 'type'>> = ({ 
   label, 
   value, 
   onChange, 

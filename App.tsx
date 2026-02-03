@@ -160,7 +160,7 @@ const App: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-none">Gestão de Contratos</h1>
+              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight leading-none">Controle de Ativos</h1>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 block">WFS CORPORATE</span>
             </div>
           </div>
