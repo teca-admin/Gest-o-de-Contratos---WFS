@@ -31,7 +31,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
         className="absolute inset-0 bg-slate-900/40 backdrop-blur-md transition-opacity duration-500" 
         onClick={onClose}
       />
-      <div className="relative bg-white shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] w-full max-w-3xl overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300">
+      <div className="relative bg-white shadow-[0_32px_64px_-12px_rgba(0,0,0,0.14)] w-full max-w-3xl transform transition-all animate-in fade-in zoom-in duration-300">
         <div className="px-10 py-8 border-b border-slate-50 flex items-center justify-between bg-white">
           <div>
             <h3 className="text-2xl font-black text-slate-900 tracking-tight">{title}</h3>
@@ -46,8 +46,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             </svg>
           </button>
         </div>
-        {/* Adicionado pb-48 para dar espaço ao calendário no final do formulário */}
-        <div className="px-10 py-10 max-h-[80vh] overflow-y-auto pb-48">
+        {/* Overflow configurado como visible para não cortar portais se houver algum erro de cálculo */}
+        <div className="px-10 pt-10 pb-6 max-h-[85vh] overflow-y-visible">
           {children}
         </div>
       </div>

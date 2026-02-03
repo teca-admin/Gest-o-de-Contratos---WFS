@@ -1,5 +1,6 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -53,17 +54,42 @@ interface SelectProps {
 
 export const Select: React.FC<SelectProps> = ({ label, options, value, onChange, error, required }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const updateCoords = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen) updateCoords();
+  }, [isOpen]);
+
   useEffect(() => {
+    const handleEvents = () => {
+      if (isOpen) updateCoords();
+    };
+    window.addEventListener('scroll', handleEvents, true);
+    window.addEventListener('resize', handleEvents);
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => {
+      window.removeEventListener('scroll', handleEvents, true);
+      window.removeEventListener('resize', handleEvents);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleSelect = (option: string) => {
     onChange({ target: { value: option } });
@@ -88,7 +114,7 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
           ${isOpen ? 'border-indigo-500 ring-4 ring-indigo-500/10 bg-white' : ''}
         `}
       >
-        <span className={value ? 'text-slate-900' : 'text-slate-300'}>
+        <span className={value ? 'text-slate-900 font-bold' : 'text-slate-300'}>
           {value || 'Selecione...'}
         </span>
         <svg 
@@ -101,8 +127,17 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
         </svg>
       </button>
 
-      {isOpen && (
-        <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-slate-200 shadow-2xl z-[110] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+      {isOpen && coords.width > 0 && createPortal(
+        <div 
+          style={{ 
+            position: 'fixed', 
+            top: coords.top + 4, 
+            left: coords.left, 
+            width: coords.width,
+            zIndex: 9999 
+          }}
+          className="bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.2)] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200 rounded-sm"
+        >
           <div className="max-h-60 overflow-y-auto py-1">
             {options.map((opt) => (
               <button
@@ -118,7 +153,8 @@ export const Select: React.FC<SelectProps> = ({ label, options, value, onChange,
               </button>
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
       
       {error && <span className="text-[10px] font-semibold text-red-500 mt-1">{error}</span>}
@@ -134,6 +170,7 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
   required 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0, width: 0 });
   const [viewDate, setViewDate] = useState(new Date());
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -144,15 +181,41 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
 
   const daysOfWeek = ["D", "S", "T", "Q", "Q", "S", "S"];
 
+  const updateCoords = () => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      setCoords({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (isOpen) updateCoords();
+  }, [isOpen]);
+
   useEffect(() => {
+    const handleEvents = () => {
+      if (isOpen) updateCoords();
+    };
+    window.addEventListener('scroll', handleEvents, true);
+    window.addEventListener('resize', handleEvents);
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        const portalContent = document.querySelector('[data-datepicker-portal]');
+        if (portalContent && portalContent.contains(event.target as Node)) return;
         setIsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    return () => {
+      window.removeEventListener('scroll', handleEvents, true);
+      window.removeEventListener('resize', handleEvents);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const getDaysInMonth = (year: number, month: number) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (year: number, month: number) => new Date(year, month, 1).getDay();
@@ -214,8 +277,17 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
         </svg>
       </button>
 
-      {isOpen && (
-        <div className="absolute top-[calc(100%+8px)] left-0 w-[280px] bg-white border border-slate-200 shadow-[0_20px_50px_rgba(0,0,0,0.2)] z-[150] p-4 animate-in fade-in slide-in-from-top-2 duration-200 rounded-sm">
+      {isOpen && coords.width > 0 && createPortal(
+        <div 
+          data-datepicker-portal
+          style={{ 
+            position: 'fixed', 
+            top: coords.top + 8, 
+            left: coords.left, 
+            zIndex: 9999 
+          }}
+          className="w-[280px] bg-white border border-slate-200 shadow-[0_30px_60px_-12px_rgba(0,0,0,0.3)] p-4 animate-in fade-in slide-in-from-top-2 duration-200 rounded-sm"
+        >
           {/* Calendar Header */}
           <div className="flex items-center justify-between mb-4">
             <button type="button" onClick={handlePrevMonth} className="p-2 hover:bg-slate-100 text-slate-400 hover:text-indigo-600 transition-all rounded-full">
@@ -244,12 +316,10 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
 
           {/* Days Grid */}
           <div className="grid grid-cols-7 gap-px bg-slate-100 border border-slate-100 overflow-hidden">
-            {/* Empty slots */}
             {Array.from({ length: firstDay }).map((_, i) => (
               <div key={`empty-${i}`} className="bg-white aspect-square" />
             ))}
             
-            {/* Days */}
             {Array.from({ length: daysInMonth }).map((_, i) => {
               const day = i + 1;
               const isSelected = selectedDate?.getDate() === day && 
@@ -268,7 +338,7 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
                   onClick={() => handleSelectDay(day)}
                   className={`
                     relative bg-white aspect-square flex items-center justify-center text-[11px] font-bold transition-all
-                    hover:bg-indigo-50 hover:text-indigo-600 z-10
+                    hover:bg-indigo-50 hover:text-indigo-600
                     ${isSelected ? 'bg-indigo-600 text-white hover:bg-indigo-700 hover:text-white ring-2 ring-indigo-600 ring-inset' : 'text-slate-600'}
                   `}
                 >
@@ -280,12 +350,12 @@ export const DatePicker: React.FC<Omit<InputProps, 'type' | 'onChange' | 'value'
               );
             })}
             
-            {/* Filler slots for 6 fixed rows */}
             {Array.from({ length: 42 - (firstDay + daysInMonth) }).map((_, i) => (
               <div key={`empty-end-${i}`} className="bg-white aspect-square" />
             ))}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {error && <span className="text-[10px] font-semibold text-red-500 mt-1">{error}</span>}
