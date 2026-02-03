@@ -5,6 +5,7 @@ import { PurchaseRecord, Category } from './types.ts';
 import { INITIAL_BASES, CATEGORIES, APP_CONFIG } from './constants.ts';
 import { Input, Select, DatePicker } from './components/Input.tsx';
 import { Modal } from './components/Modal.tsx';
+import { ContextMenu } from './components/ContextMenu.tsx';
 
 // Inicialização do cliente Supabase
 const supabaseUrl = 'https://vxhylzrertszbneyfzov.supabase.co';
@@ -15,6 +16,11 @@ const App: React.FC = () => {
   const [records, setRecords] = useState<PurchaseRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [recordToDelete, setRecordToDelete] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number, y: number, recordId: string } | null>(null);
+
   const [formData, setFormData] = useState<Partial<PurchaseRecord>>({
     fornecedor: '',
     categoria: undefined,
@@ -26,7 +32,6 @@ const App: React.FC = () => {
     vencimento: ''
   });
 
-  // Buscar dados do Supabase ao montar o componente
   useEffect(() => {
     fetchRecords();
   }, []);
@@ -46,11 +51,22 @@ const App: React.FC = () => {
     setLoading(false);
   };
 
+  const handleOpenModal = (record?: PurchaseRecord) => {
+    if (record) {
+      setIsEditing(true);
+      setFormData(record);
+    } else {
+      setIsEditing(false);
+      setFormData({ fornecedor: '', categoria: undefined, base: '', documento: '', descricao: '', pedido: '', valor: 0, vencimento: '' });
+    }
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.fornecedor || !formData.categoria || !formData.base || !formData.valor || !formData.vencimento) return;
 
-    const recordToInsert = {
+    const recordPayload = {
       fornecedor: formData.fornecedor,
       categoria: formData.categoria,
       base: formData.base,
@@ -61,33 +77,54 @@ const App: React.FC = () => {
       vencimento: formData.vencimento
     };
 
-    const { data, error } = await supabase
-      .from('purchase_records')
-      .insert([recordToInsert])
-      .select();
+    if (isEditing && formData.id) {
+      const { data, error } = await supabase
+        .from('purchase_records')
+        .update(recordPayload)
+        .eq('id', formData.id)
+        .select();
 
-    if (error) {
-      alert('Erro ao salvar no banco de dados: ' + error.message);
-    } else if (data) {
-      setRecords(prev => [data[0], ...prev]);
-      setFormData({ fornecedor: '', categoria: undefined, base: '', documento: '', descricao: '', pedido: '', valor: 0, vencimento: '' });
-      setIsModalOpen(false);
+      if (error) {
+        alert('Erro ao atualizar: ' + error.message);
+      } else if (data) {
+        setRecords(prev => prev.map(r => r.id === formData.id ? data[0] : r));
+        setIsModalOpen(false);
+      }
+    } else {
+      const { data, error } = await supabase
+        .from('purchase_records')
+        .insert([recordPayload])
+        .select();
+
+      if (error) {
+        alert('Erro ao salvar: ' + error.message);
+      } else if (data) {
+        setRecords(prev => [data[0], ...prev]);
+        setIsModalOpen(false);
+      }
     }
   };
 
-  const deleteRecord = async (id: string) => {
-    if (confirm("Deseja realmente remover este registro estratégico?")) {
-      const { error } = await supabase
-        .from('purchase_records')
-        .delete()
-        .eq('id', id);
+  const confirmDelete = async () => {
+    if (!recordToDelete) return;
+    
+    const { error } = await supabase
+      .from('purchase_records')
+      .delete()
+      .eq('id', recordToDelete);
 
-      if (error) {
-        alert('Erro ao excluir: ' + error.message);
-      } else {
-        setRecords(prev => prev.filter(r => r.id !== id));
-      }
+    if (error) {
+      alert('Erro ao excluir: ' + error.message);
+    } else {
+      setRecords(prev => prev.filter(r => r.id !== recordToDelete));
+      setIsDeleteModalOpen(false);
+      setRecordToDelete(null);
     }
+  };
+
+  const handleContextMenu = (e: React.MouseEvent, recordId: string) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, recordId });
   };
 
   const summaries = useMemo(() => {
@@ -114,7 +151,6 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Executive Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-[1600px] mx-auto px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -147,8 +183,6 @@ const App: React.FC = () => {
       </header>
 
       <main className="max-w-[1600px] mx-auto px-8 py-10 space-y-10">
-        
-        {/* KPI Grid */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           <div className="bg-white p-7 border border-slate-200 shadow-sm hover:shadow-md transition-shadow group">
             <div className="flex justify-between items-start mb-4">
@@ -175,15 +209,14 @@ const App: React.FC = () => {
           ))}
         </section>
 
-        {/* Intelligence Table */}
         <section className="bg-white border border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden">
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
-              <p className="text-[11px] text-slate-400 font-medium mt-1">Sincronizado com Supabase Cloud.</p>
+              <p className="text-[11px] text-slate-400 font-medium mt-1">Clique com o botão direito em uma linha para editar ou excluir.</p>
             </div>
             <button 
-              onClick={() => setIsModalOpen(true)}
+              onClick={() => handleOpenModal()}
               className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-6 transition-all shadow-xl shadow-slate-200 flex items-center gap-2 active:scale-95"
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -214,13 +247,12 @@ const App: React.FC = () => {
                   <th className="px-6 py-5 w-[12%] text-center">PEDIDO</th>
                   <th className="px-6 py-5 w-[12%] text-center">VALOR</th>
                   <th className="px-6 py-5 w-[12%] text-center">VENCIMENTO</th>
-                  <th className="px-6 py-5 w-[8%] text-center">AÇÕES</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {records.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan={9} className="px-8 py-32 text-center">
+                    <td colSpan={8} className="px-8 py-32 text-center">
                        <div className="flex flex-col items-center gap-3 opacity-30">
                           <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
@@ -231,7 +263,11 @@ const App: React.FC = () => {
                   </tr>
                 ) : (
                   records.map((record) => (
-                    <tr key={record.id} className="hover:bg-slate-50/80 transition-all group align-middle">
+                    <tr 
+                      key={record.id} 
+                      onContextMenu={(e) => handleContextMenu(e, record.id)}
+                      className="hover:bg-indigo-50/30 transition-all cursor-context-menu align-middle"
+                    >
                       <td className="px-6 py-6 text-center">
                         <div className="font-bold text-slate-900 text-[11px] truncate uppercase tracking-tight mx-auto max-w-full" title={record.fornecedor}>
                           {record.fornecedor}
@@ -278,16 +314,6 @@ const App: React.FC = () => {
                         </div>
                         <div className="text-[11px] text-slate-400 font-medium uppercase">Previsão</div>
                       </td>
-                      <td className="px-6 py-6 text-center">
-                        <button 
-                          onClick={() => deleteRecord(record.id)}
-                          className="p-2 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </td>
                     </tr>
                   ))
                 )}
@@ -297,10 +323,23 @@ const App: React.FC = () => {
         </section>
       </main>
 
+      {contextMenu && (
+        <ContextMenu 
+          x={contextMenu.x} 
+          y={contextMenu.y} 
+          onClose={() => setContextMenu(null)}
+          onEdit={() => handleOpenModal(records.find(r => r.id === contextMenu.recordId))}
+          onDelete={() => {
+            setRecordToDelete(contextMenu.recordId);
+            setIsDeleteModalOpen(true);
+          }}
+        />
+      )}
+
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Novo Registro Analítico - WFS"
+        title={isEditing ? "Editar Registro Analítico" : "Novo Registro Analítico - WFS"}
       >
         <form onSubmit={handleSubmit} className="space-y-8">
           <Input 
@@ -386,10 +425,42 @@ const App: React.FC = () => {
               type="submit"
               className="flex-[2] bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 px-6 transition-all shadow-xl shadow-indigo-100 text-lg active:scale-95"
             >
-              Confirmar Lançamento
+              {isEditing ? "Salvar Alterações" : "Confirmar Lançamento"}
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)} 
+        title="Confirmar Exclusão"
+      >
+        <div className="py-4 text-center">
+          <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <p className="text-slate-600 font-medium mb-8">
+            Você tem certeza que deseja apagar este registro? <br/>
+            Esta ação é irreversível e removerá os dados do Supabase permanentemente.
+          </p>
+          <div className="flex gap-4">
+            <button 
+              onClick={() => setIsDeleteModalOpen(false)}
+              className="flex-1 text-slate-500 font-bold py-4 hover:bg-slate-50 transition-all"
+            >
+              Cancelar
+            </button>
+            <button 
+              onClick={confirmDelete}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white font-black py-4 px-6 transition-all shadow-xl shadow-red-100 active:scale-95"
+            >
+              Sim, Apagar Agora
+            </button>
+          </div>
+        </div>
       </Modal>
     </div>
   );
