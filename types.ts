@@ -5,7 +5,10 @@ export enum Category {
   SERVICO = 'SERVIÇO'
 }
 
-export type BaseLocation = 'MAO' | 'BVB' | 'PHB' | string;
+export type BaseLocation = 
+  | 'PHB' | 'THE' | 'TFF' | 'SLZ' | 'PMW' | 'BEL' 
+  | 'BVB' | 'TBT' | 'JPA' | 'REC' | 'SSA' | 'NAT' | 'FOR' 
+  | string;
 
 export interface PurchaseRecord {
   id: string;

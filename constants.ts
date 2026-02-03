@@ -1,7 +1,21 @@
 
 import { Category } from './types';
 
-export const INITIAL_BASES = ['MAO', 'BVB', 'PHB'];
+export const INITIAL_BASES = [
+  'PHB',
+  'THE',
+  'TFF',
+  'SLZ',
+  'PMW',
+  'BEL',
+  'BVB',
+  'TBT',
+  'JPA',
+  'REC',
+  'SSA',
+  'NAT',
+  'FOR'
+];
 
 export const CATEGORIES = [
   Category.LOCACAO,
