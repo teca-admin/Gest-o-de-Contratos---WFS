@@ -46,7 +46,8 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }
             </svg>
           </button>
         </div>
-        <div className="px-10 py-10 max-h-[80vh] overflow-y-auto">
+        {/* Adicionado pb-48 para dar espaço ao calendário no final do formulário */}
+        <div className="px-10 py-10 max-h-[80vh] overflow-y-auto pb-48">
           {children}
         </div>
       </div>

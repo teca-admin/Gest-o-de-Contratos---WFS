@@ -91,7 +91,7 @@ const App: React.FC = () => {
               </div>
               <div className="text-right">
                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Volume Operacional</p>
-                <p className="text-xl font-extrabold text-indigo-600">{records.length} <span className="text-xs font-medium text-slate-400">lançamentos</span></p>
+                <p className="text-xl font-extrabold text-indigo-600">{records.length} <span className="text-[11px] font-medium text-slate-400">lançamentos</span></p>
               </div>
             </div>
             <button 
@@ -118,19 +118,19 @@ const App: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
               </div>
-              <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 uppercase">Monitoramento Real-time</span>
+              <span className="text-[11px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 uppercase">Monitoramento Real-time</span>
             </div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Custo Global Consolidade</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Custo Global Consolidade</p>
             <p className="text-3xl font-extrabold text-slate-900">{formatCurrency(totalGeral)}</p>
           </div>
 
           {summaries.map((s) => (
             <div key={s.base} className="bg-white p-7 border border-slate-200 shadow-sm hover:shadow-md transition-shadow border-t-4 border-t-indigo-500">
               <div className="flex justify-between items-center mb-4">
-                <span className="w-10 h-10 bg-slate-50 flex items-center justify-center font-black text-slate-600 text-sm">{s.base}</span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase">{s.count} transações</span>
+                <span className="w-10 h-10 bg-slate-50 flex items-center justify-center font-black text-slate-600 text-[11px]">{s.base}</span>
+                <span className="text-[11px] font-bold text-slate-400 uppercase">{s.count} transações</span>
               </div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Unidade Operacional</p>
+              <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">Unidade Operacional</p>
               <p className="text-2xl font-extrabold text-slate-900">{formatCurrency(s.total)}</p>
             </div>
           ))}
@@ -141,7 +141,7 @@ const App: React.FC = () => {
           <div className="p-8 border-b border-slate-100 flex items-center justify-between">
             <div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Registro Geral de Ativos</h2>
-              <p className="text-xs text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
+              <p className="text-[11px] text-slate-400 font-medium mt-1">Consolidação de contratos e compras auditadas com rastreabilidade total.</p>
             </div>
             <div className="flex gap-3">
               <button 
@@ -151,7 +151,7 @@ const App: React.FC = () => {
                   a.href = dataStr; a.download = "wfs_gestao_audit.json";
                   a.click();
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-2 px-5 py-2.5 border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-slate-50 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -162,43 +162,42 @@ const App: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse table-fixed min-w-[1200px]">
+            <table className="w-full text-center border-collapse table-fixed min-w-[1200px]">
               <thead>
-                <tr className="bg-slate-50/50 text-slate-400 text-[10px] uppercase font-black tracking-widest">
-                  <th className="px-6 py-5 w-[220px]">FORNECEDOR</th>
-                  <th className="px-6 py-5 w-[140px]">CATEGORIA</th>
-                  <th className="px-6 py-5 w-[100px]">BASE</th>
-                  <th className="px-6 py-5 w-[180px]">REFERÊNCIA DO DOCUMENTO</th>
-                  <th className="px-6 py-5 w-[240px]">DESCRIÇÃO</th>
-                  <th className="px-6 py-5 w-[110px]">PEDIDO</th>
-                  <th className="px-6 py-5 w-[140px] text-right">VALOR</th>
-                  <th className="px-6 py-5 w-[140px] text-right">VENCIMENTO</th>
-                  <th className="px-6 py-5 w-[80px] text-center">Ações</th>
+                <tr className="bg-slate-50/50 text-slate-400 text-[11px] uppercase font-black tracking-widest align-middle">
+                  <th className="px-6 py-5 w-[16%] text-center">FORNECEDOR</th>
+                  <th className="px-6 py-5 w-[12%] text-center">CATEGORIA</th>
+                  <th className="px-6 py-5 w-[12%] text-center">BASE</th>
+                  <th className="px-6 py-5 w-[12%] text-center">REFERÊNCIA DO DOCUMENTO</th>
+                  <th className="px-6 py-5 w-[12%] text-center">DESCRIÇÃO</th>
+                  <th className="px-6 py-5 w-[12%] text-center">PEDIDO</th>
+                  <th className="px-6 py-5 w-[12%] text-center">VALOR</th>
+                  <th className="px-6 py-5 w-[12%] text-center">VENCIMENTO</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {records.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="px-8 py-32 text-center">
+                    <td colSpan={8} className="px-8 py-32 text-center">
                        <div className="flex flex-col items-center gap-3 opacity-30">
                           <svg className="w-20 h-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={0.5} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
                           </svg>
-                          <p className="text-lg font-bold">Aguardando novos lançamentos operacionais WFS</p>
+                          <p className="text-[11px] font-bold">Aguardando novos lançamentos operacionais WFS</p>
                        </div>
                     </td>
                   </tr>
                 ) : (
                   records.map((record) => (
-                    <tr key={record.id} className="hover:bg-slate-50/80 transition-all group align-top">
-                      <td className="px-6 py-6">
-                        <div className="font-bold text-slate-900 text-sm truncate uppercase tracking-tight" title={record.fornecedor}>
+                    <tr key={record.id} className="hover:bg-slate-50/80 transition-all group align-middle">
+                      <td className="px-6 py-6 text-center">
+                        <div className="font-bold text-slate-900 text-[11px] truncate uppercase tracking-tight mx-auto max-w-full" title={record.fornecedor}>
                           {record.fornecedor}
                         </div>
                       </td>
-                      <td className="px-6 py-6">
+                      <td className="px-6 py-6 text-center">
                         <span className={`
-                          text-[9px] font-black px-2.5 py-1 uppercase tracking-widest border block text-center
+                          text-[11px] font-black px-2.5 py-1 uppercase tracking-widest border inline-block w-full text-center
                           ${record.categoria === Category.LOCACAO ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : ''}
                           ${record.categoria === Category.MATERIAL ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ''}
                           ${record.categoria === Category.SERVICO ? 'bg-amber-50 text-amber-700 border-amber-100' : ''}
@@ -206,46 +205,36 @@ const App: React.FC = () => {
                           {record.categoria}
                         </span>
                       </td>
-                      <td className="px-6 py-6">
-                        <span className="inline-flex px-2 py-1 bg-slate-900 text-white text-[10px] font-black tracking-tighter">
+                      <td className="px-6 py-6 text-center">
+                        <span className="inline-flex px-3 py-1 bg-slate-900 text-white text-[11px] font-black tracking-tighter">
                           {record.base}
                         </span>
                       </td>
-                      <td className="px-6 py-6">
-                        <div className="text-[10px] font-bold text-slate-500 break-all">
+                      <td className="px-6 py-6 text-center">
+                        <div className="text-[11px] font-bold text-slate-500 break-all">
                           {record.documento || <span className="text-slate-200">SEM REF.</span>}
                         </div>
                       </td>
-                      <td className="px-6 py-6">
-                        <div className="text-xs text-slate-500 leading-relaxed italic line-clamp-2" title={record.descricao}>
+                      <td className="px-6 py-6 text-center">
+                        <div className="text-[11px] text-slate-500 leading-relaxed italic line-clamp-2" title={record.descricao}>
                           {record.descricao || 'Nenhuma descrição técnica informada'}
                         </div>
                       </td>
-                      <td className="px-6 py-6">
-                         <div className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 inline-block rounded-sm">
+                      <td className="px-6 py-6 text-center">
+                         <div className="text-[11px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 inline-block rounded-sm">
                            #{record.pedido || '---'}
                          </div>
                       </td>
-                      <td className="px-6 py-6 text-right">
-                        <span className="text-sm font-black text-slate-900">
+                      <td className="px-6 py-6 text-center">
+                        <span className="text-[11px] font-black text-slate-900">
                           {formatCurrency(record.valor)}
                         </span>
                       </td>
-                      <td className="px-6 py-6 text-right">
-                        <div className="text-sm font-bold text-slate-900">
+                      <td className="px-6 py-6 text-center">
+                        <div className="text-[11px] font-bold text-slate-900">
                           {new Date(record.vencimento).toLocaleDateString(APP_CONFIG.LOCALE)}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-medium uppercase">Previsão</div>
-                      </td>
-                      <td className="px-6 py-6 text-center">
-                        <button 
-                          onClick={() => deleteRecord(record.id)}
-                          className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
-                        >
-                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                        <div className="text-[11px] text-slate-400 font-medium uppercase">Previsão</div>
                       </td>
                     </tr>
                   ))

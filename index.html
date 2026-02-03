@@ -8,11 +8,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        html {
+            /* Define a base para o rem como 11px, o que já ajuda na escala */
+            font-size: 11px;
+        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
             color: #0f172a;
             -webkit-font-smoothing: antialiased;
+            /* Aplica a redução de zoom de 10% em relação ao viewport */
+            zoom: 0.9;
+            font-size: 11px;
         }
         ::-webkit-scrollbar {
             width: 6px;
@@ -26,6 +33,13 @@
         }
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
+        }
+        
+        /* Ajuste para garantir que o zoom não quebre o layout fixo em telas menores */
+        @media (max-width: 1024px) {
+            body {
+                zoom: 1; /* Retorna ao normal em telas pequenas para evitar perda de acessibilidade */
+            }
         }
     </style>
     <script type="importmap">
