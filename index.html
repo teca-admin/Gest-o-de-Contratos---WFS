@@ -14,11 +14,6 @@
             color: #0f172a;
             -webkit-font-smoothing: antialiased;
         }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -33,18 +28,25 @@
             background: #94a3b8;
         }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@19.0.0",
-    "react/": "https://esm.sh/react@19.0.0/",
-    "react-dom": "https://esm.sh/react-dom@19.0.0",
-    "react-dom/": "https://esm.sh/react-dom@19.0.0/"
-  }
-}
-</script>
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@19.0.0",
+        "react/": "https://esm.sh/react@19.0.0/",
+        "react-dom": "https://esm.sh/react-dom@19.0.0",
+        "react-dom/": "https://esm.sh/react-dom@19.0.0/"
+      }
+    }
+    </script>
+    <!-- Adicionando o script principal explicitamente -->
+    <script type="module" src="./index.tsx"></script>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <!-- Indicador de carregamento caso o JS demore a baixar -->
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: #cbd5e1; font-weight: 500;">
+            Inicializando sistema WFS...
+        </div>
+    </div>
 </body>
 </html>
