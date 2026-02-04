@@ -2,7 +2,8 @@
 export enum Category {
   LOCACAO = 'LOCAÇÃO',
   MATERIAL = 'MATERIAL',
-  SERVICO = 'SERVIÇO'
+  SERVICO = 'SERVIÇO',
+  HORA_EXTRA = 'HORA EXTRA'
 }
 
 export type BaseLocation = 

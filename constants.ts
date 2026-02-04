@@ -20,7 +20,8 @@ export const INITIAL_BASES = [
 export const CATEGORIES = [
   Category.LOCACAO,
   Category.MATERIAL,
-  Category.SERVICO
+  Category.SERVICO,
+  Category.HORA_EXTRA
 ];
 
 export const APP_CONFIG = {
